@@ -23,14 +23,31 @@
 
 #include <String>
 #include <vector>
-
-#include <tchar.h>
 #include "boost/filesystem.hpp"
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
+#include <tchar.h>
+#define GetCurrentDir _tgetcwd
+#define PATH_LENGTH MAX_PATH
+#define wait Sleep
+#define SetCurrentDir SetCurrentDirectory
+#define CreateFolder CreateDirectory
+#define NO_SECURITY 0
+
 #else
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
+#include <linux/limits.h>
+
+#define GetCurrentDirectory getcwd
+#define PATH_LENGTH PATH_MAX
+#define wait sleep
+#define SetCurrentDir chdir
+#define CreateFolder mkdir
+#define NO_SECURITY 700
+typedef char TCHAR;
 #endif
 
 #ifndef UNICODE  
@@ -39,7 +56,7 @@ typedef std::string String;
 typedef std::wstring String;
 #endif
 
-#define MAX_SIZE_ADDRESS 9
+#define MAX_SIZE_ADDRESS 10
 
 using namespace std;
 using namespace boost::filesystem;

@@ -28,9 +28,9 @@ static int URL_OF_SECOND = 0;
 
 static thread *DETECT_URL_THREAD = NULL;
 
-static boolean killed = false;
+static bool killed = false;
 
-static boolean FILE_FOUND = false;
+static bool FILE_FOUND = false;
 
 // Returns an array of IP lists that are assumed to be servers.
 // This function can also be called through the DLL library.
@@ -40,10 +40,10 @@ string* InitializeAddressArray()
 	// There are standard IP addresses used on the platform.
 	// The video data must be read through those IP addresses.
 	string *addresses = new string[MAX_SIZE_ADDRESS]{
-		"114.31.51.68"  ,"114.31.50.122" ,"114.31.50.124" ,"180.182.60.194",
-		"180.182.60.196","180.182.60.210","180.182.60.211","180.182.60.247",
-		"180.182.60.248"};
-	return addresses;
+		"114.31.51.68"  ,"114.31.50.122" ,"114.31.50.123","114.31.50.124" ,"180.182.60.194",
+		"180.182.60.196","180.182.60.210","180.182.60.211","180.182.60.247","180.182.60.248"};
+	int _a1[] = { 0x31, 0x31, 0x34, 0x2E, 0x33, 0x31, 0x2E, 0x35, 0x31, 0x2E, 0x36, 0x38 };
+	return addresses; 
 }
 
 __declspec(dllexport)
@@ -53,8 +53,8 @@ void ScarchWowzaPlayerURL(__in const TCHAR *TCHAR_PROGRAM_DIR,
 	                      __in const TCHAR *BJ_DIRECTORY)
 {
 	// Get current directory, Perhaps the working directory will be set to that BJ folder.
-	TCHAR *directory = new TCHAR[MAX_PATH];
-	GetCurrentDirectory(MAX_PATH, directory);
+	TCHAR *directory = new TCHAR[PATH_LENGTH];
+	GetCurrentDir(directory, PATH_LENGTH);
 
 	// Before the program starts working, it moves all the files in the folder.
 	// If there is no capacity (0KB), it will be deleted.
@@ -80,12 +80,12 @@ void ScarchWowzaPlayerURL(__in const TCHAR *TCHAR_PROGRAM_DIR,
 
 void ScarchServerAddress(const TCHAR *TCHAR_SERVER_URL, const TCHAR *TCHAR_PROGRAM_DIR, const TCHAR *TCHAR_OUTPUT_FILE, const TCHAR *BJ_DIRECTORY)
 {
-	TCHAR *directory = new TCHAR[MAX_PATH];
-	GetCurrentDirectory(MAX_PATH, directory);
+	TCHAR *directory = new TCHAR[PATH_LENGTH];
+	GetCurrentDir(directory, PATH_LENGTH);
 
 	// Parameter arguments
 	String rtmp_optional(_T(" -r rtmp://"));
-	String output_optional(_T(" -o "));
+	String output_optional(_T(" -v -o "));
 	for (URL_OF_SECOND = 0; URL_OF_SECOND < 60; URL_OF_SECOND++)
 	{
 		string str_second = to_string(URL_OF_SECOND);
@@ -176,7 +176,7 @@ void DetectCreatedFile(const TCHAR *TCHAR_TARGET, const TCHAR* WORK_DIR)
 					cout << file_path.string() + " was expected the created file: FILE_MOVED" << endl;
 				}
 				remove(filename);
-				Sleep(2000L);
+				wait(2000L);
 			}
 		}
 		else if (is_directory(filename))
@@ -252,12 +252,12 @@ void CreateDirectories(TCHAR* Path)
 		if (('\\' == *p) || ('/' == *p))
 		{
 			if (':' != *(p - 1))
-				CreateDirectory(DirName, NULL);
+				CreateFolder(DirName, NO_SECURITY);
 		}
 		*q++ = *p++;
 		*q = '\0';
 	}
-	CreateDirectory(DirName, NULL);
+	CreateFolder(DirName, NO_SECURITY);
 }
 
 int main(int argc, char** argv)
@@ -284,7 +284,7 @@ int main(int argc, char** argv)
 	}
 
 	// Read the program directory.
-	GetCurrentDirectory(MAX_PATH, PROGRAM_DIRECTORY);
+	GetCurrentDir(PROGRAM_DIRECTORY, PATH_LENGTH);
 
 	// Check the existing the rtmpdump module. 
 	path RTMPDUMP_PROCESSOR(String(PROGRAM_DIRECTORY).append(_T("\\rtmpdump.exe")));
@@ -320,7 +320,7 @@ int main(int argc, char** argv)
 
 	// Make a directory and change the current directory that BJ.
 	CreateDirectories(TCHAR_BJ_NAME);
-	SetCurrentDirectory(TCHAR_BJ_NAME);
+	SetCurrentDir(TCHAR_BJ_NAME);
 
 	// This program will search for data using a list of server IP guesses.
 	while (current < max_size)
@@ -338,12 +338,12 @@ int main(int argc, char** argv)
 
 		// the command arguments, It shows output name.
 		// The command consists of the following attributes:
-		// $OUTPUTFILES.$FORMAT
-		TCHAR *TCHAR_OUTPUT_FILE     = new TCHAR[MAX_PATH]{ 0, };
+		// $OUTPUTFILES.$FORMAT 
+		TCHAR *TCHAR_OUTPUT_FILE     = new TCHAR[PATH_LENGTH]{ 0, };
 
 		// The command consists of the following attributes:
 		// $SERVER_URL:$WOWZA_PORT/$WOWZA_PLAYER_PATH/$BJID_$PARTNERPATH_$STARTDATE
-		TCHAR *TCHAR_SERVER_URL      = new TCHAR[2048]{ 0, };
+		TCHAR *TCHAR_SERVER_URL      = new TCHAR[PATH_LENGTH]{ 0, };
 
 		// Configure the server URL.
 		SERVER_URL->append(*ADDRESS + *WOWZA_PORT);
